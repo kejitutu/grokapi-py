@@ -296,7 +296,7 @@
           <div class="token-input-container">
               <h3>添加 SSO Token</h3>
               <div class="token-input-section">
-                  <input type="text" id="tokenInput" placeholder="输入新的 SSO Token">
+                  <input type="text" id="tokenInput" placeholder="输入SSO(多个用英文逗号分割))">
                   <button id="addTokenBtn">添加 Token</button>
               </div>
           </div>
@@ -496,27 +496,92 @@
       }
 
       // 添加 Token 事件
-      document.getElementById('addTokenBtn').addEventListener('click', async () => {
+    //   document.getElementById('addTokenBtn').addEventListener('click', async () => {
+    //       const tokenInput = document.getElementById('tokenInput');
+    //       const newToken = tokenInput.value.trim();
+    //       if (newToken) {
+    //           try {
+    //               const response = await fetch('/manager/api/add', {
+    //                   method: 'POST',
+    //                   headers: { 'Content-Type': 'application/json' },
+    //                   body: JSON.stringify({ sso: newToken })
+    //               });
+    //               if (response.ok) {
+    //                   tokenInput.value = '';
+    //                   await fetchTokenMap();
+    //                   showNotification('Token 添加成功');
+    //               } else {
+    //                   showNotification('添加 Token 失败');
+    //               }
+    //           } catch (error) {
+    //               showNotification('添加 Token 出错');
+    //           }
+    //       }
+    //   });
+
+    document.getElementById('addTokenBtn').addEventListener('click', async () => {
           const tokenInput = document.getElementById('tokenInput');
-          const newToken = tokenInput.value.trim();
-          if (newToken) {
+          const rawInput = tokenInput.value.trim();
+
+          if (!rawInput) {
+              showNotification('请输入 Token');
+              return;
+          }
+
+          // 按英文逗号分割，并过滤掉空字符串，得到需要尝试添加的 Token 列表
+          // 使用 filter(Boolean) 或 filter(token => token.trim()) 可以更早地排除无效项
+          const tokensToAttempt = rawInput.split(',')
+                                        .map(token => token.trim()) // 去除每个部分的首尾空格
+                                        .filter(Boolean); // 过滤掉空字符串
+
+          const totalTokensToAttempt = tokensToAttempt.length; // 实际将要尝试添加的 Token 数量
+
+          // 如果过滤后没有有效的 Token
+          if (totalTokensToAttempt === 0) {
+              showNotification('未输入有效的 Token');
+              // 可以在这里选择是否清空输入框
+              // tokenInput.value = '';
+              return;
+          }
+
+          let successCount = 0;
+          let failureCount = 0;
+
+          // 遍历有效的 Token 列表
+          for (const singleToken of tokensToAttempt) {
               try {
                   const response = await fetch('/manager/api/add', {
                       method: 'POST',
                       headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify({ sso: newToken })
+                      body: JSON.stringify({ sso: singleToken })
                   });
+
                   if (response.ok) {
-                      tokenInput.value = '';
-                      await fetchTokenMap();
-                      showNotification('Token 添加成功');
+                      successCount++;
+                      console.log(`Token "${singleToken}" 添加成功`); // 保留日志供调试
                   } else {
-                      showNotification('添加 Token 失败');
+                      failureCount++;
+                      console.error(`添加 Token "${singleToken}" 失败，状态码: ${response.status}`);
                   }
               } catch (error) {
-                  showNotification('添加 Token 出错');
+                  failureCount++;
+                  console.error(`添加 Token "${singleToken}" 时出错:`, error);
               }
-          }
+          } // for 循环结束
+
+          // ---- 操作完成后的处理 ----
+
+          // 1. 清空输入框
+          tokenInput.value = '';
+
+          // 2. 刷新 Token 列表 (因为我们尝试了添加)
+          await fetchTokenMap();
+
+          // 3. 显示最终的总结性通知
+          //    使用模板字符串构建消息
+          const message = `本次尝试添加 ${totalTokensToAttempt} 个 token，成功 ${successCount} 个，失败 ${failureCount} 个。`;
+          showNotification(message);
+
       });
 
       // 设置 CF Clearance 事件
