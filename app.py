@@ -114,7 +114,7 @@ CONFIG = {
     },
     "RETRY": {
         "RETRYSWITCH": False,
-        "MAX_ATTEMPTS": 2
+        "MAX_ATTEMPTS": 5
     },
     "SHOW_THINKING": os.environ.get("SHOW_THINKING") == "true",
     "IS_THINKING": False,
