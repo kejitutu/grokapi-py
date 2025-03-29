@@ -885,8 +885,8 @@ def handle_non_stream_response(response, model):
                 line_json = json.loads(chunk.decode("utf-8").strip())
                 if line_json.get("error"):
                     logger.error(json.dumps(line_json, indent=2), "Server")
-                    # return json.dumps({"error": "RateLimitError"}) + "\n\n"
-                    continue
+                    raise Exception("检测到API错误响应，触发重试机制")
+                    
 
                 response_data = line_json.get("result", {}).get("response")
                 if not response_data:
@@ -930,9 +930,7 @@ def handle_stream_response(response, model):
                 line_json = json.loads(chunk.decode("utf-8").strip())
                 if line_json.get("error"):
                     logger.error(json.dumps(line_json, indent=2), "Server")
-                    # yield json.dumps({"error": "RateLimitError"}) + "\n\n"
-                    # return
-                    continue
+                    raise Exception("检测到API错误响应，触发重试机制")
 
                 response_data = line_json.get("result", {}).get("response")
                 if not response_data:
@@ -1188,6 +1186,9 @@ def chat_completions():
 
                     except Exception as error:
                         logger.error(str(error), "Server")
+                            if "检测到API错误响应" in str(error):
+                            # 设置状态码为403，触发重试
+                            response_status_code = 403
                         if CONFIG["API"]["IS_CUSTOM_SSO"]:
                             raise ValueError(f"自定义SSO令牌当前模型{model}的请求次数已失效")
                         token_manager.remove_token_from_model(model, CONFIG["API"]["SIGNATURE_COOKIE"])
