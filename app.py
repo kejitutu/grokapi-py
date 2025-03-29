@@ -1186,7 +1186,7 @@ def chat_completions():
 
                     except Exception as error:
                         logger.error(str(error), "Server")
-                            if "检测到API错误响应" in str(error):
+                        if "检测到API错误响应" in str(error):
                             # 设置状态码为403，触发重试
                             response_status_code = 403
                         if CONFIG["API"]["IS_CUSTOM_SSO"]:
