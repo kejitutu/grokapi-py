@@ -885,7 +885,8 @@ def handle_non_stream_response(response, model):
                 line_json = json.loads(chunk.decode("utf-8").strip())
                 if line_json.get("error"):
                     logger.error(json.dumps(line_json, indent=2), "Server")
-                    return json.dumps({"error": "RateLimitError"}) + "\n\n"
+                    # return json.dumps({"error": "RateLimitError"}) + "\n\n"
+                    continue
 
                 response_data = line_json.get("result", {}).get("response")
                 if not response_data:
@@ -929,8 +930,9 @@ def handle_stream_response(response, model):
                 line_json = json.loads(chunk.decode("utf-8").strip())
                 if line_json.get("error"):
                     logger.error(json.dumps(line_json, indent=2), "Server")
-                    yield json.dumps({"error": "RateLimitError"}) + "\n\n"
-                    return
+                    # yield json.dumps({"error": "RateLimitError"}) + "\n\n"
+                    # return
+                    continue
 
                 response_data = line_json.get("result", {}).get("response")
                 if not response_data:
