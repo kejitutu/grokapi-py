@@ -159,7 +159,7 @@ class AuthTokenManager:
                 "ExpirationTime": 1 * 60 * 60 * 1000  # 1小时
             },
             "grok-3": {
-                "RequestFrequency": 20,
+                "RequestFrequency": 18,
                 "ExpirationTime": 2 * 60 * 60 * 1000  # 2小时
             },
             "grok-3-deepsearch": {
@@ -171,7 +171,7 @@ class AuthTokenManager:
                 "ExpirationTime": 24 * 60 * 60 * 1000  # 24小时
             },
             "grok-3-reasoning": {
-                "RequestFrequency": 10,
+                "RequestFrequency": 8,
                 "ExpirationTime": 24 * 60 * 60 * 1000  # 24小时
             }
         }
